@@ -1,3 +1,4 @@
 {
-    "python.analysis.typeCheckingMode": "off"
+    "python.analysis.typeCheckingMode": "off",
+    "python.linting.pylintPath": "C:/Users/Victor/.virtualenvs/palace_hotel-QCxgP_An/Scripts/python.exe"
 }

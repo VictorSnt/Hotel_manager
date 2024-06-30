@@ -10,6 +10,7 @@ sqlmodel = "*"
 fastapi = "*"
 aiosqlite = "*"
 uvicorn = "*"
+pre-commit = "*"
 
 [dev-packages]
 

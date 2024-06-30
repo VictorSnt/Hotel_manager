@@ -13,7 +13,10 @@ disable=
       R0903, # too-few-public-methods
       W0719, # broad-exception-raised
       C0121, # 
-
+      W0237,
+      E0401, #Unable to import
+      E1121
+      
 
 
 # Analyse import fallback blocks. This can be used to support both Python 2 and
