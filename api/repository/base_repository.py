@@ -1,17 +1,19 @@
 # std
 from typing import Callable, Dict, List, Optional, Type, Union
 # ext
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from sqlmodel import select
-from api.database.db_connector import SessionMaker
+#app
+from api.database.db_connector import SessionMaker, AsyncSession
 from api.model.base import BaseModel
+
 
 class BaseRepository:
     """
     Base repository class providing CRUD operations.
     """
 
-    def __init__(self, session_maker: SessionMaker, model: Type[BaseModel]) -> None:
+    def __init__(self, session_maker: Type[SessionMaker], model: Type[BaseModel]) -> None:
         self.session_maker = session_maker
         self.model = model
 
@@ -41,14 +43,12 @@ class BaseRepository:
             return new_obj
 
     async def find_and_update(
-        self, obj_id: int, updated_obj: Dict,
-        usecase: Union[Callable, None]
+            self, obj_id: int, updated_obj: Dict,
+            usecase: Union[Callable, None] = None
         ) -> BaseModel:
-        async with self.session_maker.get_session_async() as session:
-            query = select(self.model).where(self.model.id == obj_id)
-            result = await session.exec(query)
-            obj = result.first()
 
+        async with self.session_maker.get_session_async() as session:
+            obj = await self.__get_obj(obj_id, session)
             if not obj:
                 raise HTTPException(status_code=404, detail=f"No {self.model.__name__} found")
             if usecase:
@@ -62,10 +62,24 @@ class BaseRepository:
             await session.refresh(obj)
             return obj
 
-    async def find_and_delete(self, obj: BaseModel) -> Dict:
+    async def find_and_delete(self, obj_id: int) -> Dict:
         async with self.session_maker.get_session_async() as session:
+            obj = await self.__get_obj(obj_id, session)
             setattr(obj, 'active', False)
             session.add(obj)
             await session.commit()
             await session.refresh(obj)
             return {"detail": f"{self.model.__name__} deleted successfully"}
+
+    async def __get_obj(self, obj_id: int, session: AsyncSession):
+        query = select(self.model).where(
+            (self.model.id == obj_id) & (self.model.active == True)
+        )
+        result = await session.exec(query)
+        obj = result.first()
+        if not obj:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No {self.model.__name__} found"
+            )
+        return obj

@@ -14,11 +14,12 @@ class ProductRepository(BaseRepository):
         super().__init__(session_maker, Product)
 
     async def create(self, created_product: CreateProduct) -> Product:
-        new_product = Product(**created_product.model_dump())
+        new_product = created_product.model_dump()
         return await super().create(new_product)
 
-    async def find_and_update(self, product: Product) -> Product:
-        return await super().find_and_update(product, {}, lambda x: x)
+    async def find_and_update(self, product_id: int, updated_product: Product) -> Product:
+        updated_product_dict = updated_product.model_dump()
+        return await super().find_and_update(product_id, updated_product_dict)
 
-    async def find_and_delete(self, product: Product) -> Dict:
-        return await super().find_and_delete(product)
+    async def find_and_delete(self, product_id: int) -> Dict:
+        return await super().find_and_delete(product_id)

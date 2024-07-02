@@ -11,6 +11,7 @@ fastapi = "*"
 aiosqlite = "*"
 uvicorn = "*"
 pre-commit = "*"
+pytest = "*"
 
 [dev-packages]
 
